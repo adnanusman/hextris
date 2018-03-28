@@ -380,3 +380,21 @@ function showHelp() {
 	script.src = 'http://hextris.io/a.js';
 	document.head.appendChild(script);
 })()
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').then(function(reg) {
+      console.log('SW registered successfully');
+      reg.addEventListener('updatefound', function() {
+        console.log('There is a new Service Worker available');
+      })
+      
+      reg.addEventListener('controllerchange', function() {
+        window.location.reload();  
+      })
+    }, function(err) {
+      console.log('SW registration failed');
+    });
+
+  });
+}
