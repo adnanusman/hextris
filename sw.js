@@ -1,4 +1,4 @@
-var CACHE_NAME = 'hextris-v1';
+var CACHE_NAME = 'hextris-v2';
 var urlsToCache = [
     'index.html',
     'a.js',
@@ -41,34 +41,39 @@ var urlsToCache = [
 ];
 
 self.addEventListener('install', function(event) {
-    event.waitUntil(
-      caches.open(CACHE_NAME).then(function(cache) {
-        return cache.addAll(urlsToCache);
-      })
-    );
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(function(cache) {
+      return cache.addAll(urlsToCache);
+    })
+  );
 });
 
 self.addEventListener('fetch', function(event) {
-    var requestUrl = new URL(event.request.url);
+  var requestUrl = new URL(event.request.url);
     
-    if(requestUrl.origin === location.origin) {   
-        event.respondWith(
-          caches.match(event.request).then(function(response) {
-              if(response) return response;
-              return fetch(event.request);
-          })
-        )
-    }
+  if(requestUrl.origin === location.origin) {   
+    event.respondWith(
+      caches.match(event.request).then(function(response) {
+        if(response) return response;
+        return fetch(event.request);
+      })
+    )
+  }
 });
 
 self.addEventListener('activate', function(event) {
-    event.waitUntil(
-      caches.keys().then(function(cacheNames) {
-        cacheNames.filter(function(cacheName) {
-          if(cacheName.startsWith('hextris') && cacheName !== CACHE_NAME) {
-            caches.delete(cacheName);
-          }
-        })
+  event.waitUntil(
+    caches.keys().then(function(cacheNames) {
+      cacheNames.filter(function(cacheName) {
+        if(cacheName.startsWith('hextris') && cacheName !== CACHE_NAME) {
+          caches.delete(cacheName);
+        }
       })
-    )
+    })
+  )
 })
+
+self.addEventListener('message', function(event) {
+  if(event.data.activate == 'true');
+    self.skipWaiting();
+});

@@ -383,18 +383,58 @@ function showHelp() {
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/sw.js').then(function(reg) {
+    navigator.serviceWorker.register('./sw.js').then(function(reg) {
       console.log('SW registered successfully');
+        
+      if(!navigator.serviceWorker.controller) {
+        return;
+      }
+        
+      if(reg.waiting) {
+        notifySWUpdates(reg);      
+      }
+        
+      if(reg.installing) {
+        trackSWStates(reg);
+      }
+        
       reg.addEventListener('updatefound', function() {
-        console.log('There is a new Service Worker available');
+        trackSWStates(reg);
       })
-      
-      reg.addEventListener('controllerchange', function() {
+        
+      navigator.serviceWorker.addEventListener('controllerchange', function() {
         window.location.reload();  
-      })
+      });
+      
     }, function(err) {
       console.log('SW registration failed');
     });
 
+  });
+}
+
+function notifySWUpdates(reg) {
+    console.log('There is a new Service Worker available');
+    let SW_Button = document.createElement('button');
+    SW_Button.innerHTML = 'Update Available';
+    let doc_body = document.getElementsByTagName('body')[0];
+    doc_body.appendChild(SW_Button);
+    SW_Button.style.backgroundColor = 'blue';
+    SW_Button.style.color = '#fff';
+    SW_Button.style.position = 'fixed';
+    SW_Button.style.bottom = '0px';
+    SW_Button.style.right = '0px';
+    SW_Button.style.padding = '5px 10px';
+    SW_Button.addEventListener('click', function() {
+      console.log(reg);
+      reg.waiting.postMessage({activate: 'true'});
+    });
+}
+
+function trackSWStates(reg) {
+  reg.installing.addEventListener('statechange', function() {
+    if(this.state == 'installed') {
+      notifySWUpdates(reg);
+    }
   });
 }
