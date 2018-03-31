@@ -1,4 +1,4 @@
-var CACHE_NAME = 'hextris-v3';
+var CACHE_NAME = 'hextris-v6';
 var urlsToCache = [
     'index.html',
     'vendor/hammer.min.js',
@@ -51,15 +51,20 @@ self.addEventListener('fetch', function(event) {
 });
 
 self.addEventListener('activate', function(event) {
+
   event.waitUntil(
-    caches.keys().then(function(cacheNames) {
-      cacheNames.filter(function(cacheName) {
-        if(cacheName.startsWith('hextris') && cacheName !== CACHE_NAME) {
+    Promise.all([
+      clients.claim(),
+      caches.keys().then(function(cacheNames) {
+        cacheNames.filter(function(cacheName) {
+          if(cacheName.startsWith('hextris') && cacheName !== CACHE_NAME) {
           caches.delete(cacheName);
-        }
+          }
+        })
       })
-    })
-  );
+     ]
+    )
+  )
 });
 
 self.addEventListener('message', function(event) {
