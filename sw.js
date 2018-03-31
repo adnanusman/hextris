@@ -1,43 +1,11 @@
-var CACHE_NAME = 'hextris-v2';
+var CACHE_NAME = 'hextris-v1';
 var urlsToCache = [
     'index.html',
-    'a.js',
-    'vendor/hammer.min.js',
-    'vendor/js.cookie.js',
-    'vendor/jsonfn.min.js',
-    'vendor/keypress.min.js',
-    'vendor/jquery.js',
-    'js/save-state.js',
-    'js/view.js',
-    'js/wavegen.js',
-    'js/math.js',
-    'js/Block.js',
-    'js/Hex.js',
-    'js/Text.js',
-    'js/comboTimer.js',
-    'js/checking.js',
-    'js/update.js',
-    'js/render.js',
-    'js/input.js',
     'js/main.js',
     'js/initialization.js',
     'http://fonts.googleapis.com/css?family=Exo+2',
 	'style/fa/css/font-awesome.min.css',
 	'style/style.css',
-    'images/android.png',
-    'images/appstore.svg',
-    'images/btn_back.svg',
-    'images/btn_facebook.svg',
-    'images/btn_help.svg',
-    'images/btn_pause.svg',
-    'images/btn_restart.svg',
-    'images/btn_resume.svg',
-    'images/btn_share.svg',
-    'images/btn_twitter.svg',
-    'images/facebook-opengraph.png',
-    'images/icon_arrows.svg',
-    'images/twitter-opengraph.png',
-    'vendor/rrssb.min.js'
 ];
 
 self.addEventListener('install', function(event) {
@@ -49,16 +17,11 @@ self.addEventListener('install', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
-  var requestUrl = new URL(event.request.url);
-    
-  if(requestUrl.origin === location.origin) {   
     event.respondWith(
       caches.match(event.request).then(function(response) {
-        if(response) return response;
-        return fetch(event.request);
+        return response || getNetworkResponse(event.request);
       })
     )
-  }
 });
 
 self.addEventListener('activate', function(event) {
@@ -70,10 +33,30 @@ self.addEventListener('activate', function(event) {
         }
       })
     })
-  )
-})
+  );
+});
 
 self.addEventListener('message', function(event) {
   if(event.data.activate == 'true');
     self.skipWaiting();
 });
+
+function getNetworkResponse(request) {
+  return caches.open(CACHE_NAME).then(function(cache) {
+    cache.match(request.url).then(function(response) {
+      if(response) {
+        return response;
+      } else {
+        fetch(request.url, {mode: 'no-cors'}).then(function(networkResponse) {
+          if (!networkResponse === 200) {
+            throw new Error('request failed');
+          }
+          cache.put(request.url, networkResponse.clone());
+          return networkResponse;
+        }).catch(function(err) {
+          console.log('fetching error:', err);
+        });
+      }
+    });
+  });
+}

@@ -391,19 +391,22 @@ if ('serviceWorker' in navigator) {
       }
         
       if(reg.waiting) {
-        notifySWUpdates(reg);      
+        notifySWUpdates(reg.waiting);      
       }
         
       if(reg.installing) {
-        trackSWStates(reg);
+        trackSWStates(reg.installing);
       }
         
       reg.addEventListener('updatefound', function() {
-        trackSWStates(reg);
+        trackSWStates(reg.installing);
       })
-        
+      
+      var reloading;
       navigator.serviceWorker.addEventListener('controllerchange', function() {
-        window.location.reload();  
+        if(reloading) return;
+        window.location.reload();
+        reloading = true;
       });
       
     }, function(err) {
@@ -427,12 +430,12 @@ function notifySWUpdates(reg) {
     SW_Button.style.padding = '5px 10px';
     SW_Button.addEventListener('click', function() {
       console.log(reg);
-      reg.waiting.postMessage({activate: 'true'});
+      reg.postMessage({activate: 'true'});
     });
 }
 
 function trackSWStates(reg) {
-  reg.installing.addEventListener('statechange', function() {
+  reg.addEventListener('statechange', function() {
     if(this.state == 'installed') {
       notifySWUpdates(reg);
     }
