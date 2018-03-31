@@ -1,6 +1,31 @@
-var CACHE_NAME = 'hextris-v9';
+var CACHE_NAME = 'hextris-v1';
 var urlsToCache = [
-    'index.html'
+    'index.html',
+    'vendor/hammer.min.js',
+    'vendor/js.cookie.js',
+    'vendor/jsonfn.min.js',
+    'vendor/keypress.min.js',
+    'vendor/jquery.js',
+    'js/save-state.js',
+    'js/view.js',
+    'js/wavegen.js',
+    'js/math.js',
+    'js/Block.js',
+    'js/Hex.js',
+    'js/Text.js',
+    'js/comboTimer.js',
+    'js/checking.js',
+    'js/update.js',
+    'js/render.js',
+    'js/input.js',
+    'js/main.js',
+    'js/initialization.js',
+    'http://fonts.googleapis.com/css?family=Exo+2',
+    'style/fa/css/font-awesome.min.css',
+    'style/style.css',
+    'style/rrssb.css',
+    'vendor/rrssb.min.js',
+    'vendor/sweet-alert.min.js'    
 ];
 
 self.addEventListener('install', function(event) {
