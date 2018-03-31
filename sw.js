@@ -1,31 +1,6 @@
-var CACHE_NAME = 'hextris-v6';
+var CACHE_NAME = 'hextris-v9';
 var urlsToCache = [
-    'index.html',
-    'vendor/hammer.min.js',
-    'vendor/js.cookie.js',
-    'vendor/jsonfn.min.js',
-    'vendor/keypress.min.js',
-    'vendor/jquery.js',
-    'js/save-state.js',
-    'js/view.js',
-    'js/wavegen.js',
-    'js/math.js',
-    'js/Block.js',
-    'js/Hex.js',
-    'js/Text.js',
-    'js/comboTimer.js',
-    'js/checking.js',
-    'js/update.js',
-    'js/render.js',
-    'js/input.js',
-    'js/main.js',
-    'js/initialization.js',
-    'http://fonts.googleapis.com/css?family=Exo+2',
-	'style/fa/css/font-awesome.min.css',
-	'style/style.css',
-    'style/rrssb.css',
-    'vendor/rrssb.min.js',
-    'vendor/sweet-alert.min.js'    
+    'index.html'
 ];
 
 self.addEventListener('install', function(event) {
@@ -37,17 +12,14 @@ self.addEventListener('install', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
-    event.respondWith(
-      caches.match(event.request).then(function(response) {
-        let requestUrl = new URL(event.request.url);
-          
-        if(requestUrl.origin === location.origin) {
-          return response || getNetworkResponse(event.request);
-        }
-          
-        return response || fetch(event.request);
-      })
-    )
+  const requestUrl = new URL(event.request.url);
+
+  if (requestUrl.origin === location.origin) {
+    event.respondWith(getNetworkResponse(event.request));
+    return;
+  }
+
+  event.respondWith(fetch(event.request));
 });
 
 self.addEventListener('activate', function(event) {
@@ -73,12 +45,14 @@ self.addEventListener('message', function(event) {
 });
 
 function getNetworkResponse(request) {  
-  caches.open(CACHE_NAME).then(function(cache) {
-    fetch(request).then(function(networkResponse) {
-      cache.put(request.url, networkResponse.clone());
-      return networkResponse;
-    }).catch(function(err) {
-     console.log('fetching error:', err);
+  return caches.open(CACHE_NAME).then(cache => {
+    return cache.match(request).then(response => {
+      if (response) return response;
+
+      return fetch(request).then(networkResponse => {
+        cache.put(request, networkResponse.clone());
+        return networkResponse;
+      })
     });
- });
+  });
 };
