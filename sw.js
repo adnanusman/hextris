@@ -1,11 +1,31 @@
-var CACHE_NAME = 'hextris-v1';
+var CACHE_NAME = 'hextris-v3';
 var urlsToCache = [
     'index.html',
+    'vendor/hammer.min.js',
+    'vendor/js.cookie.js',
+    'vendor/jsonfn.min.js',
+    'vendor/keypress.min.js',
+    'vendor/jquery.js',
+    'js/save-state.js',
+    'js/view.js',
+    'js/wavegen.js',
+    'js/math.js',
+    'js/Block.js',
+    'js/Hex.js',
+    'js/Text.js',
+    'js/comboTimer.js',
+    'js/checking.js',
+    'js/update.js',
+    'js/render.js',
+    'js/input.js',
     'js/main.js',
     'js/initialization.js',
     'http://fonts.googleapis.com/css?family=Exo+2',
 	'style/fa/css/font-awesome.min.css',
 	'style/style.css',
+    'style/rrssb.css',
+    'vendor/rrssb.min.js',
+    'vendor/sweet-alert.min.js'    
 ];
 
 self.addEventListener('install', function(event) {
@@ -19,7 +39,13 @@ self.addEventListener('install', function(event) {
 self.addEventListener('fetch', function(event) {
     event.respondWith(
       caches.match(event.request).then(function(response) {
-        return response || getNetworkResponse(event.request);
+        let requestUrl = new URL(event.request.url);
+          
+        if(requestUrl.origin === location.origin) {
+          return response || getNetworkResponse(event.request);
+        }
+          
+        return response || fetch(event.request);
       })
     )
 });
@@ -41,22 +67,13 @@ self.addEventListener('message', function(event) {
     self.skipWaiting();
 });
 
-function getNetworkResponse(request) {
-  return caches.open(CACHE_NAME).then(function(cache) {
-    cache.match(request.url).then(function(response) {
-      if(response) {
-        return response;
-      } else {
-        fetch(request.url, {mode: 'no-cors'}).then(function(networkResponse) {
-          if (!networkResponse === 200) {
-            throw new Error('request failed');
-          }
-          cache.put(request.url, networkResponse.clone());
-          return networkResponse;
-        }).catch(function(err) {
-          console.log('fetching error:', err);
-        });
-      }
+function getNetworkResponse(request) {  
+  caches.open(CACHE_NAME).then(function(cache) {
+    fetch(request).then(function(networkResponse) {
+      cache.put(request.url, networkResponse.clone());
+      console.log('network response:', networkResponse)
+    }).catch(function(err) {
+     console.log('fetching error:', err);
     });
-  });
-}
+ });
+};
