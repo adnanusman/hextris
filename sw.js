@@ -71,7 +71,7 @@ function getNetworkResponse(request) {
   caches.open(CACHE_NAME).then(function(cache) {
     fetch(request).then(function(networkResponse) {
       cache.put(request.url, networkResponse.clone());
-      console.log('network response:', networkResponse)
+      return networkResponse;
     }).catch(function(err) {
      console.log('fetching error:', err);
     });
